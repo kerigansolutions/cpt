@@ -1,6 +1,6 @@
 <?php
 
-namespace KeriganSolutions\CPT;
+namespace Includes\Modules\CPT;
 
 /**
  * CustomPostType Class
@@ -233,6 +233,15 @@ class CustomPostType
                 wp_enqueue_script('flatpickr-script', 'https://unpkg.com/flatpickr', [ 'jquery' ]);
             }
 
+            if($type == 'gallery') {
+                $images = '';
+                $imageIds = explode('|',$fieldValue);
+                foreach($imageIds as $imageId){
+                    $images .= wp_get_attachment_image( $imageId, 'thumbnail', false, [ 'style' => "width: 150px; max-width: 100%; float: left; margin:.5%" ]);
+                }
+                $field = str_replace('{images}', ($fieldValue!='' ? $images : ''), $field);
+            }
+
             if ($isMulti) {
                 $options = '';
                 foreach ($type['data'] as $key => $option) {
@@ -345,8 +354,8 @@ class CustomPostType
                     return;
                 }
 
-                if (isset($_POST['custom_post_type'])) {
-                    if (! wp_verify_nonce($_POST['custom_post_type'], plugin_basename(__FILE__))) {
+                if(isset($_POST['custom_post_type'])) {
+                    if ( ! wp_verify_nonce($_POST['custom_post_type'], plugin_basename(__FILE__))) {
                         return;
                     }
                 }
@@ -361,7 +370,7 @@ class CustomPostType
                         // Loop through all fields
                         foreach ($fields as $label => $type) {
                             $fieldIdName = $this->uglify($title) . '_' . $this->uglify($label);
-                            if (isset($_POST['custom_meta'][$fieldIdName])) {
+                            if(isset($_POST['custom_meta'][$fieldIdName])) {
                                 update_post_meta($post->ID, $fieldIdName, $_POST['custom_meta'][$fieldIdName]);
                             }
                         }
